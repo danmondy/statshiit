@@ -1,47 +1,48 @@
 package main
 
-import(
+import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"encoding/json"
 )
 
-type Configuration struct{
-	Port string
-	Dbname string
-	Dbpassword string	
+type Configuration struct {
+	Port       string
+	Dbname     string
+	Dbpassword string
 }
-type Operation  struct{
+type Operation struct {
 	Command string
 	Content string
 }
+
 var Config Configuration
 
-func main(){
+func main() {
 	commands := map[string]func(){
-		"insert" : insert,
-		"update" : update,
+		"insert": insert,
+		"update": update,
 	}
-	
+
 	readConfig()
 
 	http.HandleFunc("/api", apiHandler)
-	http.ListenAndServe(":"+Config.port, nil) 
+	http.ListenAndServe(":"+Config.port, nil)
 }
 
-func readConfig(){
+func readConfig() {
 	data, err := ioutil.ReadFile("config.json")
 	if err != nil {
 		panic(err)
 	}
 	err = json.Unmarshal(data, &Config)
-	if err != nil{
+	if err != nil {
 		panic(err)
 	}
 }
 
-func apiHandler(w http.ResponseWriter, r *http.Request){
+func apiHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusExceptionFailed)
@@ -52,4 +53,3 @@ func apiHandler(w http.ResponseWriter, r *http.Request){
 	err := json.Unmarshal(body, ops)
 
 }
-
