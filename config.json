@@ -1,5 +1,5 @@
 {
     "Port": "24601",
-    "Dbname":"statshiit",
+    "Dbname":".statshiit.db",
     "Dbpassword" : "flound3r"
 }
