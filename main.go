@@ -18,9 +18,7 @@ type Operation struct {
 	Command string
 	Content string
 }
-type Character struct {
 
-}
 //Making db global so I don't have to pass it around.
 //I might change my mind but for now it seems simple. And simple is good.
 var (
@@ -41,6 +39,8 @@ func main() {
 	}
 	
 	RebuildDB() //uncomment if you make a schema change - will wipe data
+	populateDB()
+
 	fmt.Println(Config)
 	http.HandleFunc("/api", apiHandler)
 	fmt.Println("Listening")
@@ -68,7 +68,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 	user, err := GetUserByEmail(email)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("User not found:("))
+		w.Write([]byte("User not found:("+err.Error()))
 		return
 	}
 	err = user.CompareHash([]byte(p))
@@ -78,6 +78,8 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//END AUTH - so continue with user object
+	w.Write([]byte("Authed!"))
+	return
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -87,5 +89,14 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var ops []Operation
 	err = json.Unmarshal(body, ops)
-	fmt.Fprint(w, "Hello")
+	fmt.Fprintf(w, "%v\n %v", user, ops)
+}
+func populateDB(){
+	users := []User{NewUser("danmondy@gmail.com", "happy", 3), NewUser("josh@gmail.com", "happy", 3)}
+	for _, u := range users{
+		err := InsertUser(&u);		
+		if err != nil{
+			fmt.Println(err)
+		}
+	}
 }

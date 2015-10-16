@@ -17,7 +17,7 @@ type User struct{
 func NewUser(email string, password string, rank int)User{
 	u := User{Email: email, Rank: rank}
 	u.SetHashword([]byte(password))
-	u.Since = time.Now()
+	u.Sixnce = time.Now()
 	return u
 }
 
