@@ -14,7 +14,7 @@ func RebuildDB() error {
 	}
 	//sqlite doesn't require autoincrement on id's (integer primary key auto assigns an unused random rowid if empty)
 	sqlStmt := "create table user (id integer not null primary key, email text, hashword text, rank integer, since text);" +
-		"create table character (id integer not null primary key, user_id integer, name text, image text, json_stats text, date_modified text);"
+		"create table character (id integer not null primary key, user_id integer, name text, image text, stats_json text, date_modified text);"
 
 	_, err = Db.Exec(sqlStmt)
 	if err != nil {
@@ -22,6 +22,15 @@ func RebuildDB() error {
 	}
 	fmt.Println("Database created.")
 	return nil
+}
+func PopulateDB(){
+	users := []User{NewUser("danmondy@gmail.com", "happy", 3), NewUser("josh@gmail.com", "happy", 3)}
+	for _, u := range users{
+		err := InsertUser(&u);		
+		if err != nil{
+			fmt.Println(err)
+		}
+	}
 }
 
 //COMMON
@@ -69,7 +78,13 @@ func GetCharById(id int) (*Character, error) {
 	return MapChar(row)
 }
 func InsertChar(c *Character) (sql.Result, error) {
-	return Db.Exec(fmt.Sprintf("INSERT into character (user_id, name, stats_json, image, date_modified) VALUES ('%v', '%v', '%v', '%v')", c.UserId, c.Name, c.StatsJson, c.Image, c.DateModified))
+	result, err := Db.Exec(fmt.Sprintf("INSERT into character (user_id, name, stats_json, image, date_modified) VALUES ('%s', '%s', '%s', '%s', '%s')", c.UserId, c.Name, c.StatsJson, c.Image, TimeToString(time.Now())))
+	if err != nil {
+		return result, err
+	}
+	id, _ := result.LastInsertId()//TODO: uncaught error (not sure best way to handle this guy)
+	c.Id = id
+	return result, err
 }
 func UpdateChar(c Character) (sql.Result, error) {
 	return Db.Exec(fmt.Sprintf("UPDATE character SET name=%s, stats_json=%s, image=%s, date_modified=%v", c.Name, c.StatsJson, c.Image, c.DateModified))

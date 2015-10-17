@@ -7,7 +7,7 @@ import (
 
 //User
 type User struct{
-	Id int
+	Id int64
 	Email string
 	Hashword string
 	Rank int
@@ -17,7 +17,7 @@ type User struct{
 func NewUser(email string, password string, rank int)User{
 	u := User{Email: email, Rank: rank}
 	u.SetHashword([]byte(password))
-	u.Sixnce = time.Now()
+	u.Since = time.Now()
 	return u
 }
 
@@ -37,10 +37,18 @@ func (u *User) CompareHash(p []byte)error{
 
 //Character
 type Character struct{
-	Id int
-	UserId int
+	Id int64
+	UserId int64
 	Name string
 	StatsJson string
 	Image string
 	DateModified time.Time
+}
+func NewCharacter(userId int64, name string, stats string, image string)*Character{
+	c := &Character{}
+	c.Name = name
+	c.UserId = userId
+	c.StatsJson = stats
+	c.Image = image
+	return c
 }
